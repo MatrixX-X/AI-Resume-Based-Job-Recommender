@@ -1,24 +1,31 @@
 from qdrant_client import QdrantClient, models
-from qdrant_client.models import VectorParams, Distance
-import os
 from dotenv import load_dotenv
+import streamlit as st
+import os
 
-load_dotenv()
-# Local (embedded) Qdrant – NO DOCKER NEEDED
-client = QdrantClient(
-    path="./local_qdrant",  # Saves db files in this folder
-    prefer_grpc=True
-)
+# Load local .env file only if it exists
+if os.path.exists(".env"):
+    load_dotenv()
 
-print(client.get_collections())
+# Safe getter for secrets — works both locally and on Spaces
+def get_secret(key: str) -> str:
+    value = os.getenv(key)
+    if value is None:
+        raise RuntimeError(f"Missing required secret: {key}")
+    return value
 
-def create_collection():
-    client.recreate_collection(
-        collection_name="resumes",
-        vectors_config=models.VectorParams(size=768, distance=models.Distance.COSINE),  # Fixed vector size
+@st.cache_resource
+def get_qdrant_client():
+    """
+    Initializes and returns a Qdrant client, cached for the app session.
+    Works locally with `.env` and on Spaces with Secrets UI.
+    """
+    lurl = get_secret("QDRANT_URL")
+    lapi_key = get_secret("QDRANT_API_KEY").strip()
+    
+    client = QdrantClient(
+        url=lurl,
+        api_key=lapi_key,
+        prefer_grpc=False
     )
-
-try:
-    client.get_collection(collection_name="resumes")
-except Exception:
-    create_collection()
+    return client

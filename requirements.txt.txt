@@ -1,0 +1,22 @@
+# Core ML and NLP
+sentence-transformers
+keybert
+torch
+scikit-learn
+numpy
+pandas
+
+# Web Framework
+streamlit
+transformers
+
+# Database Connector
+qdrant-client
+
+# PDF and OCR Processing
+PyPDF2
+pdf2image
+pytesseract
+
+# Environment Variables
+python-dotenv
